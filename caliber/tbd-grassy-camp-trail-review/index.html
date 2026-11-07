@@ -33,6 +33,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .label{font:500 11px/1.4 var(--ui);color:var(--mute);text-align:center;padding:0 16px 4px}
 /* Website: the published proof, full height */
 #website iframe{display:block;width:100%;height:calc(100dvh - 41px - env(safe-area-inset-top,0px));border:0;background:#fff}
+/* Eblast: the live Mailchimp archive. Its fixed "Subscribe | Past Issues" bar is
+   41px tall at every width (measured 2026-11-07); the frame is shifted up 41px
+   inside a clipping box so the bar never shows, even while scrolling. */
+#eblast .clip{position:relative;overflow:hidden;width:100%;max-width:600px;margin:0 auto;background:#fff;
+  height:calc(100dvh - 41px - env(safe-area-inset-top,0px))}
+#eblast iframe{position:absolute;top:-41px;left:0;width:100%;height:calc(100% + 41px);border:0}
 @media (prefers-reduced-motion:reduce){.slider{scroll-behavior:auto}}
 </style>
 </head>
@@ -41,6 +47,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <span class="id">TBD Grassy Camp Trail</span>
   <a href="#social" role="tab" id="t-social" aria-controls="social">Social</a>
   <a href="#website" role="tab" id="t-website" aria-controls="website">Website</a>
+  <a href="#eblast" role="tab" id="t-eblast" aria-controls="eblast">Eblast</a>
 </nav>
 
 <section class="panel" id="social" role="tabpanel" aria-labelledby="t-social">
@@ -51,6 +58,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 <section class="panel" id="website" role="tabpanel" aria-labelledby="t-website" hidden>
   <iframe title="Website enhancement proof" loading="lazy" data-src="../tbd-grassy-camp-trail/"></iframe>
+</section>
+
+<section class="panel" id="eblast" role="tabpanel" aria-labelledby="t-eblast" hidden>
+  <div class="clip"><iframe title="Eblast" data-src="https://us20.campaign-archive.com/?u=8242ff1a26aa2fbcaee7e1def&amp;id=75bab4be56"></iframe></div>
 </section>
 
 <script>
@@ -72,11 +83,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     [...s.querySelectorAll('img')].forEach((im,i)=>{if(Math.abs(i-cur)<=2) im.loading='eager'})};
   s.addEventListener('scroll',()=>requestAnimationFrame(upd),{passive:true});
   document.getElementById('prev').onclick=()=>go(cur-1); document.getElementById('next').onclick=()=>go(cur+1);
-  document.addEventListener('keydown',e=>{if(location.hash==='#website')return; if(e.key==='ArrowLeft')go(cur-1); if(e.key==='ArrowRight')go(cur+1)});
+  document.addEventListener('keydown',e=>{if(location.hash&&location.hash!=='#social')return; if(e.key==='ArrowLeft')go(cur-1); if(e.key==='ArrowRight')go(cur+1)});
   window.addEventListener('resize',()=>s.scrollLeft=cur*s.clientWidth);
-  const show=()=>{const h=(location.hash||'#social').slice(1); const t=['social','website'].includes(h)?h:'social';
-    ['social','website'].forEach(id=>{document.getElementById(id).hidden=id!==t; document.getElementById('t-'+id).setAttribute('aria-selected',String(id===t))});
-    if(t==='website'){const f=document.querySelector('#website iframe'); if(!f.src) f.src=f.dataset.src}
+  const show=()=>{const h=(location.hash||'#social').slice(1); const T=['social','website','eblast']; const t=T.includes(h)?h:'social';
+    T.forEach(id=>{document.getElementById(id).hidden=id!==t; document.getElementById('t-'+id).setAttribute('aria-selected',String(id===t))});
+    const f=document.querySelector('#'+t+' iframe'); if(f&&!f.getAttribute('src')) f.src=f.dataset.src;
     upd()};
   window.addEventListener('hashchange',show); show();
 })();
