@@ -42,7 +42,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* Eblast: the live Mailchimp archive. Its fixed "Subscribe | Past Issues" bar is
    41px tall at every width (measured 2026-11-07); the frame is shifted up 41px
    inside a clipping box so the bar never shows, even while scrolling. */
-#eblast .clip{position:relative;overflow:hidden;width:100%;max-width:820px;margin:0 auto;background:#fff;
+#eblast .clip{position:relative;overflow:hidden;width:100%;background:#fff;
   height:calc(100dvh - 41px - env(safe-area-inset-top,0px))}
 #eblast iframe{position:absolute;top:-41px;left:0;width:100%;height:calc(100% + 41px);border:0}
 @media (prefers-reduced-motion:reduce){.slider{scroll-behavior:auto}}
