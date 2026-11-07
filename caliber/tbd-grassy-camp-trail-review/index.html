@@ -21,22 +21,28 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tabs a[aria-selected="true"]{color:var(--on);border-bottom-color:var(--on)}
 .tabs a:focus-visible{outline:2px solid var(--on);outline-offset:-4px}
 .panel[hidden]{display:none}
-/* Social: native swipe carousel */
-.slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+/* Social: one viewport tall, so the controls never move; each screen scales to fit.
+   Arrows sit on the left and right edges on wider screens; phones swipe. */
+#social{position:relative;display:flex;flex-direction:column;height:calc(100dvh - 41px - env(safe-area-inset-top,0px))}
+#social[hidden]{display:none}
+.slider{flex:1;min-height:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .slider::-webkit-scrollbar{display:none}
-.slide{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;justify-content:center;align-items:flex-start;padding:12px 0 8px}
-.slide img{display:block;width:min(100%,430px);height:auto;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06)}
-.ctl{display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 16px 22px;font:500 12px/1 var(--mono);color:var(--mute)}
-.ctl button{font:inherit;color:var(--ink);background:var(--bar);border:1px solid var(--line);border-radius:6px;width:34px;height:30px;cursor:pointer}
-.ctl button:disabled{opacity:.35;cursor:default}
-.ctl .count{min-width:56px;text-align:center;font-variant-numeric:tabular-nums}
-.label{font:500 11px/1.4 var(--ui);color:var(--mute);text-align:center;padding:0 16px 4px}
+.slide{flex:0 0 100%;height:100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;justify-content:center;align-items:center;padding:12px 8px 4px}
+.slide img{display:block;max-width:min(100%,560px);max-height:100%;width:auto;height:auto;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08)}
+.foot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.label{font:500 11px/1.3 var(--ui);color:var(--mute)}
+.count{font:500 12px/1 var(--mono);color:var(--mute);font-variant-numeric:tabular-nums}
+.nav{position:absolute;top:calc(50% - 30px);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bar);
+  color:var(--ink);font:500 18px/1 var(--ui);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);display:none;align-items:center;justify-content:center}
+.nav:disabled{opacity:.3;cursor:default}
+.nav.prev{left:max(16px,env(safe-area-inset-left,0px))}.nav.next{right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:700px) and (hover:hover){.nav{display:flex}.slide{padding:16px 80px 6px}}
 /* Website: the published proof, full height */
 #website iframe{display:block;width:100%;height:calc(100dvh - 41px - env(safe-area-inset-top,0px));border:0;background:#fff}
 /* Eblast: the live Mailchimp archive. Its fixed "Subscribe | Past Issues" bar is
    41px tall at every width (measured 2026-11-07); the frame is shifted up 41px
    inside a clipping box so the bar never shows, even while scrolling. */
-#eblast .clip{position:relative;overflow:hidden;width:100%;max-width:600px;margin:0 auto;background:#fff;
+#eblast .clip{position:relative;overflow:hidden;width:100%;max-width:820px;margin:0 auto;background:#fff;
   height:calc(100dvh - 41px - env(safe-area-inset-top,0px))}
 #eblast iframe{position:absolute;top:-41px;left:0;width:100%;height:calc(100% + 41px);border:0}
 @media (prefers-reduced-motion:reduce){.slider{scroll-behavior:auto}}
@@ -52,8 +58,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 <section class="panel" id="social" role="tabpanel" aria-labelledby="t-social">
   <div class="slider" id="slider" tabindex="0" aria-label="Social post previews, swipe to see each screen"></div>
-  <div class="label" id="label"></div>
-  <div class="ctl"><button id="prev" aria-label="Previous screen">&#8592;</button><span class="count" id="count">1 / 12</span><button id="next" aria-label="Next screen">&#8594;</button></div>
+  <button class="nav prev" id="prev" aria-label="Previous screen">&#8592;</button>
+  <button class="nav next" id="next" aria-label="Next screen">&#8594;</button>
+  <div class="foot"><span class="label" id="label"></span><span class="count" id="count">1 / 12</span></div>
 </section>
 
 <section class="panel" id="website" role="tabpanel" aria-labelledby="t-website" hidden>
@@ -66,6 +73,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 <script>
 (function(){
+  const SIZES={"01-instagram-1of9.jpg": [1179, 1531], "02-instagram-2of9.jpg": [1179, 1531], "03-instagram-3of9.jpg": [1179, 1531], "04-instagram-4of9.jpg": [1179, 1531], "05-instagram-5of9.jpg": [1179, 1531], "06-instagram-6of9.jpg": [1179, 1531], "07-instagram-7of9.jpg": [1179, 1531], "08-instagram-8of9.jpg": [1179, 1531], "09-instagram-9of9.jpg": [1179, 1531], "10-facebook-post.jpg": [1179, 1656], "11-facebook-caption-1.jpg": [1179, 2071], "12-facebook-caption-2.jpg": [1179, 2104]};
   const shots=[
     ['01-instagram-1of9.jpg','Instagram · slide 1 of 9'],['02-instagram-2of9.jpg','Instagram · slide 2 of 9'],
     ['03-instagram-3of9.jpg','Instagram · slide 3 of 9'],['04-instagram-4of9.jpg','Instagram · slide 4 of 9'],
@@ -75,9 +83,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     ['11-facebook-caption-1.jpg','Facebook · full caption (top)'],['12-facebook-caption-2.jpg','Facebook · full caption (end)']];
   const s=document.getElementById('slider'), count=document.getElementById('count'), label=document.getElementById('label');
   shots.forEach(([f,l],i)=>{const d=document.createElement('div');d.className='slide';const im=new Image();
+    const wh=SIZES[f]; im.width=wh[0]; im.height=wh[1];
     im.src='img/'+f; im.alt=l; im.decoding='async'; if(i>1) im.loading='lazy'; d.appendChild(im); s.appendChild(d)});
   const n=shots.length; let cur=0;
-  const go=i=>{i=Math.max(0,Math.min(n-1,i)); s.scrollTo({left:i*s.clientWidth,behavior:'smooth'})};
+  const go=i=>{i=Math.max(0,Math.min(n-1,i)); const x=i*s.clientWidth; s.scrollTo({left:x,behavior:'smooth'});
+    setTimeout(()=>{if(Math.abs(s.scrollLeft-x)>2) s.scrollLeft=x},450)};   // fallback where smooth scrolling doesn't run
   const upd=()=>{if(s.clientWidth) cur=Math.round(s.scrollLeft/s.clientWidth); count.textContent=(cur+1)+' / '+n; label.textContent=shots[cur][1];
     document.getElementById('prev').disabled=cur===0; document.getElementById('next').disabled=cur===n-1;
     [...s.querySelectorAll('img')].forEach((im,i)=>{if(Math.abs(i-cur)<=2) im.loading='eager'})};
