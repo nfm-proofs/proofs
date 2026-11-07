@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Review · TBD Grassy Camp Trail</title>
+<style>
+/* Review shell: a plain utility frame around client-facing previews. Deliberately not Caliber-styled. */
+:root{--bg:#f6f6f4;--bar:#ffffff;--ink:#1d1f21;--mute:#7a7f85;--line:#e3e4e1;--on:#1d1f21;
+--ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--ui);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bar);z-index:20}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:stretch;gap:2px;height:40px;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  background:var(--bar);border-bottom:1px solid var(--line)}
+.tabs .id{margin-right:auto;align-self:center;font:500 11px/1 var(--mono);color:var(--mute);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tabs a{display:flex;align-items:center;padding:0 12px;font:600 11px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mute);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;-webkit-tap-highlight-color:transparent}
+.tabs a[aria-selected="true"]{color:var(--on);border-bottom-color:var(--on)}
+.tabs a:focus-visible{outline:2px solid var(--on);outline-offset:-4px}
+.panel[hidden]{display:none}
+/* Social: native swipe carousel */
+.slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
+.slider::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;justify-content:center;align-items:flex-start;padding:12px 0 8px}
+.slide img{display:block;width:min(100%,430px);height:auto;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06)}
+.ctl{display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 16px 22px;font:500 12px/1 var(--mono);color:var(--mute)}
+.ctl button{font:inherit;color:var(--ink);background:var(--bar);border:1px solid var(--line);border-radius:6px;width:34px;height:30px;cursor:pointer}
+.ctl button:disabled{opacity:.35;cursor:default}
+.ctl .count{min-width:56px;text-align:center;font-variant-numeric:tabular-nums}
+.label{font:500 11px/1.4 var(--ui);color:var(--mute);text-align:center;padding:0 16px 4px}
+/* Website: the published proof, full height */
+#website iframe{display:block;width:100%;height:calc(100dvh - 41px - env(safe-area-inset-top,0px));border:0;background:#fff}
+@media (prefers-reduced-motion:reduce){.slider{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<nav class="tabs" role="tablist" aria-label="Deliverables">
+  <span class="id">TBD Grassy Camp Trail</span>
+  <a href="#social" role="tab" id="t-social" aria-controls="social">Social</a>
+  <a href="#website" role="tab" id="t-website" aria-controls="website">Website</a>
+</nav>
+
+<section class="panel" id="social" role="tabpanel" aria-labelledby="t-social">
+  <div class="slider" id="slider" tabindex="0" aria-label="Social post previews, swipe to see each screen"></div>
+  <div class="label" id="label"></div>
+  <div class="ctl"><button id="prev" aria-label="Previous screen">&#8592;</button><span class="count" id="count">1 / 12</span><button id="next" aria-label="Next screen">&#8594;</button></div>
+</section>
+
+<section class="panel" id="website" role="tabpanel" aria-labelledby="t-website" hidden>
+  <iframe title="Website enhancement proof" loading="lazy" data-src="../tbd-grassy-camp-trail/"></iframe>
+</section>
+
+<script>
+(function(){
+  const shots=[
+    ['01-instagram-1of9.jpg','Instagram · slide 1 of 9'],['02-instagram-2of9.jpg','Instagram · slide 2 of 9'],
+    ['03-instagram-3of9.jpg','Instagram · slide 3 of 9'],['04-instagram-4of9.jpg','Instagram · slide 4 of 9'],
+    ['05-instagram-5of9.jpg','Instagram · slide 5 of 9'],['06-instagram-6of9.jpg','Instagram · slide 6 of 9'],
+    ['07-instagram-7of9.jpg','Instagram · slide 7 of 9'],['08-instagram-8of9.jpg','Instagram · slide 8 of 9'],
+    ['09-instagram-9of9.jpg','Instagram · slide 9 of 9'],['10-facebook-post.jpg','Facebook · post'],
+    ['11-facebook-caption-1.jpg','Facebook · full caption (top)'],['12-facebook-caption-2.jpg','Facebook · full caption (end)']];
+  const s=document.getElementById('slider'), count=document.getElementById('count'), label=document.getElementById('label');
+  shots.forEach(([f,l],i)=>{const d=document.createElement('div');d.className='slide';const im=new Image();
+    im.src='img/'+f; im.alt=l; im.decoding='async'; if(i>1) im.loading='lazy'; d.appendChild(im); s.appendChild(d)});
+  const n=shots.length; let cur=0;
+  const go=i=>{i=Math.max(0,Math.min(n-1,i)); s.scrollTo({left:i*s.clientWidth,behavior:'smooth'})};
+  const upd=()=>{if(s.clientWidth) cur=Math.round(s.scrollLeft/s.clientWidth); count.textContent=(cur+1)+' / '+n; label.textContent=shots[cur][1];
+    document.getElementById('prev').disabled=cur===0; document.getElementById('next').disabled=cur===n-1;
+    [...s.querySelectorAll('img')].forEach((im,i)=>{if(Math.abs(i-cur)<=2) im.loading='eager'})};
+  s.addEventListener('scroll',()=>requestAnimationFrame(upd),{passive:true});
+  document.getElementById('prev').onclick=()=>go(cur-1); document.getElementById('next').onclick=()=>go(cur+1);
+  document.addEventListener('keydown',e=>{if(location.hash==='#website')return; if(e.key==='ArrowLeft')go(cur-1); if(e.key==='ArrowRight')go(cur+1)});
+  window.addEventListener('resize',()=>s.scrollLeft=cur*s.clientWidth);
+  const show=()=>{const h=(location.hash||'#social').slice(1); const t=['social','website'].includes(h)?h:'social';
+    ['social','website'].forEach(id=>{document.getElementById(id).hidden=id!==t; document.getElementById('t-'+id).setAttribute('aria-selected',String(id===t))});
+    if(t==='website'){const f=document.querySelector('#website iframe'); if(!f.src) f.src=f.dataset.src}
+    upd()};
+  window.addEventListener('hashchange',show); show();
+})();
+</script>
+</body>
+</html>
