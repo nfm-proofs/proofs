@@ -32,11 +32,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .foot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 16px calc(10px + env(safe-area-inset-bottom,0px))}
 .label{font:500 11px/1.3 var(--ui);color:var(--mute)}
 .count{font:500 12px/1 var(--mono);color:var(--mute);font-variant-numeric:tabular-nums}
-.nav{position:absolute;top:calc(50% - 30px);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bar);
-  color:var(--ink);font:500 18px/1 var(--ui);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);display:none;align-items:center;justify-content:center}
-.nav:disabled{opacity:.3;cursor:default}
-.nav.prev{left:max(16px,env(safe-area-inset-left,0px))}.nav.next{right:max(16px,env(safe-area-inset-right,0px))}
-@media (min-width:700px) and (hover:hover){.nav{display:flex}.slide{padding:16px 80px 6px}}
+.nav{position:absolute;top:calc(50% - 46px);width:56px;height:56px;border-radius:50%;border:0;background:#1d1f21;color:#fff;
+  font:600 24px/1 var(--ui);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28);display:none;align-items:center;justify-content:center}
+.nav:hover{background:#000}
+.nav:focus-visible{outline:3px solid #2b6cb0;outline-offset:3px}
+.nav:disabled{background:#c9ccd0;box-shadow:none;cursor:default}
+@media (min-width:700px) and (hover:hover){.nav{display:flex}.slide{padding:16px 96px 6px}}
 /* Website: the published proof, full height */
 #website iframe{display:block;width:100%;height:calc(100dvh - 41px - env(safe-area-inset-top,0px));border:0;background:#fff}
 /* Eblast: the live Mailchimp archive. Its fixed "Subscribe | Past Issues" bar is
@@ -52,18 +53,18 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <nav class="tabs" role="tablist" aria-label="Deliverables">
   <span class="id">TBD Grassy Camp Trail</span>
   <a href="#social" role="tab" id="t-social" aria-controls="social">Social</a>
-  <a href="#website" role="tab" id="t-website" aria-controls="website">Website</a>
   <a href="#eblast" role="tab" id="t-eblast" aria-controls="eblast">Eblast</a>
+  <a href="#website" role="tab" id="t-website" aria-controls="website">Website</a>
 </nav>
 
-<section class="panel" id="social" role="tabpanel" aria-labelledby="t-social">
+<section class="panel" id="social" role="tabpanel" aria-labelledby="t-social" hidden>
   <div class="slider" id="slider" tabindex="0" aria-label="Social post previews, swipe to see each screen"></div>
   <button class="nav prev" id="prev" aria-label="Previous screen">&#8592;</button>
   <button class="nav next" id="next" aria-label="Next screen">&#8594;</button>
   <div class="foot"><span class="label" id="label"></span><span class="count" id="count">1 / 12</span></div>
 </section>
 
-<section class="panel" id="website" role="tabpanel" aria-labelledby="t-website" hidden>
+<section class="panel" id="website" role="tabpanel" aria-labelledby="t-website">
   <iframe title="Website enhancement proof" loading="lazy" data-src="../tbd-grassy-camp-trail/"></iframe>
 </section>
 
@@ -90,15 +91,21 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     setTimeout(()=>{if(Math.abs(s.scrollLeft-x)>2) s.scrollLeft=x},450)};   // fallback where smooth scrolling doesn't run
   const upd=()=>{if(s.clientWidth) cur=Math.round(s.scrollLeft/s.clientWidth); count.textContent=(cur+1)+' / '+n; label.textContent=shots[cur][1];
     document.getElementById('prev').disabled=cur===0; document.getElementById('next').disabled=cur===n-1;
-    [...s.querySelectorAll('img')].forEach((im,i)=>{if(Math.abs(i-cur)<=2) im.loading='eager'})};
+    [...s.querySelectorAll('img')].forEach((im,i)=>{if(Math.abs(i-cur)<=2) im.loading='eager'}); place()};
   s.addEventListener('scroll',()=>requestAnimationFrame(upd),{passive:true});
   document.getElementById('prev').onclick=()=>go(cur-1); document.getElementById('next').onclick=()=>go(cur+1);
   document.addEventListener('keydown',e=>{if(location.hash&&location.hash!=='#social')return; if(e.key==='ArrowLeft')go(cur-1); if(e.key==='ArrowRight')go(cur+1)});
-  window.addEventListener('resize',()=>s.scrollLeft=cur*s.clientWidth);
-  const show=()=>{const h=(location.hash||'#social').slice(1); const T=['social','website','eblast']; const t=T.includes(h)?h:'social';
+  // Arrows sit 28px outside the current screenshot's edges (never closer than 12px to the window).
+  const pv=document.getElementById('prev'), nx=document.getElementById('next'), panel=document.getElementById('social');
+  function place(){const im=s.children[cur]&&s.children[cur].querySelector('img'); if(!im) return;
+    const r=im.getBoundingClientRect(), p=panel.getBoundingClientRect(); if(!r.width) return; const gap=28, b=56;
+    pv.style.left=Math.max(12, r.left-p.left-gap-b)+'px'; nx.style.left=Math.min(p.width-b-12, r.right-p.left+gap)+'px';}
+  s.querySelectorAll('img').forEach(im=>im.addEventListener('load',place));
+  window.addEventListener('resize',()=>{s.scrollLeft=cur*s.clientWidth; place()});
+  const show=()=>{const h=(location.hash||'#website').slice(1); const T=['social','website','eblast']; const t=T.includes(h)?h:'website';   // Website is the default view (Evan)
     T.forEach(id=>{document.getElementById(id).hidden=id!==t; document.getElementById('t-'+id).setAttribute('aria-selected',String(id===t))});
     const f=document.querySelector('#'+t+' iframe'); if(f&&!f.getAttribute('src')) f.src=f.dataset.src;
-    upd()};
+    upd(); if(t==='social') requestAnimationFrame(place)};
   window.addEventListener('hashchange',show); show();
 })();
 </script>
